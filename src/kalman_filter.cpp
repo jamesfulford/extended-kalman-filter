@@ -41,26 +41,13 @@ void KalmanFilter::Update(const VectorXd &z) {
 
 void KalmanFilter::UpdateEKF(const VectorXd &z) {
   VectorXd prediction = H_ * x_;
-
-  // Convert prediction to polar
-  double px = prediction[0];
-  double py = prediction[1];
-  double vx = prediction[2];
-  double vy = prediction[3];
-  VectorXd prediction_polar = VectorXd(3);
-  double pxpysqrt = sqrt(pow(px, 2) + pow(px, 2));
-
-  prediction_polar << pxpysqrt,
-                      atan2(py, px), // between -π and π, handles the divide by 0 case
-                      ((px * vx) + (py * vy)) / pxpysqrt;
-
-  VectorXd y = z - prediction_polar;
+  VectorXd error = z - prediction;
 
   MatrixXd H_transpose = H_.transpose();
   MatrixXd S = H_ * P_ * H_transpose + R_;
   MatrixXd K = P_ * H_transpose * S.inverse();
 
-  x_ = x_ + (K * y);
+  x_ = x_ + (K * error);
   long x_size = x_.size();
   P_ = (MatrixXd::Identity(x_size, x_size) - K * H_) * P_;
 }
