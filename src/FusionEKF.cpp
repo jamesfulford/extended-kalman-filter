@@ -72,8 +72,8 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
       // cout << "with radar" << endl;
       ekf_.x_ << measurement_pack.raw_measurements_[0] * cos(measurement_pack.raw_measurements_[1]),
                  measurement_pack.raw_measurements_[0] * sin(measurement_pack.raw_measurements_[1]),
-                 measurement_pack.raw_measurements_[2] * cos(measurement_pack.raw_measurements_[1]),
-                 measurement_pack.raw_measurements_[2] * sin(measurement_pack.raw_measurements_[1]);
+                 0,
+                 0;
       ekf_.P_ << 1, 0, 0, 0,
           0, 1, 0, 0,
           0, 0, 10000, 0,
