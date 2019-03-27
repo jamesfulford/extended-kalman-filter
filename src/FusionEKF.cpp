@@ -67,7 +67,9 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
    * Initialization
    */
   if (!is_initialized_) {
+    // cout << "Initializing ";
     if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
+      // cout << "with radar" << endl;
       ekf_.x_ << measurement_pack.raw_measurements_[0] * cos(measurement_pack.raw_measurements_[1]),
                  measurement_pack.raw_measurements_[0] * sin(measurement_pack.raw_measurements_[1]),
                  measurement_pack.raw_measurements_[2] * cos(measurement_pack.raw_measurements_[1]),
@@ -78,6 +80,7 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
           0, 0, 0, 10000;
     }
     else if (measurement_pack.sensor_type_ == MeasurementPackage::LASER) {
+      // cout << "with laser" << endl;
       ekf_.x_ << measurement_pack.raw_measurements_[0],
                  measurement_pack.raw_measurements_[1],
                  0,
@@ -113,13 +116,16 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 
   ekf_.F_(0, 2) = dt;
   ekf_.F_(1, 3) = dt;
+  // cout << "F" << endl << ekf_.F_ << endl;
 
   ekf_.Q_ = MatrixXd(4, 4);
   ekf_.Q_ << dt4 * noise_ax / 4, 0, dt3 * noise_ax / 2, 0,
              0, dt4 * noise_ay / 4, 0, dt3 * noise_ay / 2,
              dt3 * noise_ax / 2, 0, dt2 * noise_ax, 0,
              0, dt3 * noise_ay / 2, 0, dt2 * noise_ay;
+  // cout << "Q" << endl << ekf_.Q_ << endl;
 
+  // cout << "x" << endl << ekf_.x_ << endl;
   ekf_.Predict();
 
   /**
@@ -127,16 +133,30 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
    */
 
   if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
+    cout << "Radar update" << endl;
     ekf_.R_ = R_radar_;
+    // cout << "Radar update R" << endl << ekf_.R_ << endl;
+
     ekf_.H_ = tools.CalculateJacobian(ekf_.x_);  // TODO(jamesfulford): Use current state or measurement?
     ekf_.Update(measurement_pack.raw_measurements_);
+    // cout << "Radar update H" << endl << ekf_.H_ << endl;
+
+    // cout << "measurement_pack.raw_measurements_" << endl << measurement_pack.raw_measurements_ << endl;
+    // cout << "Radar update x" << endl << ekf_.x_ << endl;
   } else { // Laser
+    cout << "Laser update" << endl;
     ekf_.R_ = R_laser_;
+    // cout << "Laser update R" << endl << ekf_.R_ << endl;
+
     ekf_.H_  = H_laser_;
     ekf_.UpdateEKF(measurement_pack.raw_measurements_);
+    // cout << "Laser update H" << endl << ekf_.H_ << endl;
+
+    // cout << "measurement_pack.raw_measurements_" << endl << measurement_pack.raw_measurements_ << endl;
+    // cout << "Laser update x" << endl << ekf_.x_ << endl;
   }
 
   // print the output
-  cout << "x_ = " << ekf_.x_ << endl;
-  cout << "P_ = " << ekf_.P_ << endl;
+  cout << "x_ = " << endl << ekf_.x_ << endl;
+  cout << "P_ = " << endl << ekf_.P_ << endl;
 }
