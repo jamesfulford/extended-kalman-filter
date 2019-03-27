@@ -17,6 +17,26 @@ FusionEKF::FusionEKF() {
 
   previous_timestamp_ = 0;
 
+  VectorXd x = VectorXd(4);  // current state, not yet known
+  MatrixXd P = MatrixXd(4, 4);  // current covariance matrix, not yet known
+  MatrixXd F = MatrixXd(4, 4);
+  F <<  1, 0, 8, 0, // 8 will be overwritten with dt on each pass
+        0, 1, 0, 8,  // 8 will be overwritten with dt on each pass
+        0, 0, 1, 0,
+        0, 0, 0, 1;
+  MatrixXd H = MatrixXd(2, 4);  // To be overwritten on each pass
+  MatrixXd R = MatrixXd(2, 2);  // To be overwritten on each pass
+  MatrixXd Q = MatrixXd(4, 4);
+
+  ekf_.Init(
+      x,
+      P,
+      F,
+      H,
+      R,
+      Q
+  );
+
   // measurement covariance matrix - laser
   R_laser_ = MatrixXd(2, 2);
   R_laser_ << 0.0225, 0,
@@ -28,12 +48,13 @@ FusionEKF::FusionEKF() {
               0, 0.0009, 0,
               0, 0, 0.09;
 
+  // Transform measurement matrix for laser
   H_laser_ = MatrixXd(2, 4);
   H_laser_ << 1, 0, 0, 0,
               0, 1, 0, 0;
 
-  // TODO(jafulfor): Anything left to initialize?
-  // Hj_ = MatrixXd(3, 4);
+  // Transform measurement matrix for radar (jacobian)
+  Hj_ = MatrixXd(3, 4);  // to be filled later, because nonlinear transform... needs parameters
 }
 
 /**
@@ -90,11 +111,8 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
   float dt3 = dt2 * dt;
   float dt4 = dt3 * dt;
 
-  ekf_.F_ = MatrixXd(4, 4);
-  ekf_.F_ << 1, 0, dt, 0,
-             0, 1, 0, dt,
-             0, 0, 1, 0,
-             0, 0, 0, 1;
+  ekf_.F_(0, 2) = dt;
+  ekf_.F_(1, 3) = dt;
 
   ekf_.Q_ = MatrixXd(4, 4);
   ekf_.Q_ << dt4 * noise_ax / 4, 0, dt3 * noise_ax / 2, 0,
