@@ -76,8 +76,8 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
                  0;
       ekf_.P_ << 1, 0, 0, 0,
           0, 1, 0, 0,
-          0, 0, 10000, 0,
-          0, 0, 0, 10000;
+          0, 0, 1000, 0,
+          0, 0, 0, 1000;
     }
     else if (measurement_pack.sensor_type_ == MeasurementPackage::LASER) {
       // cout << "with laser" << endl;
@@ -87,8 +87,8 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
                  0;
       ekf_.P_ << 1, 0, 0, 0,
           0, 1, 0, 0,
-          0, 0, 10000, 0,
-          0, 0, 0, 10000;
+          0, 0, 1000, 0,
+          0, 0, 0, 1000;
     } else {
       cout << "Unrecognized sensor type: " + measurement_pack.sensor_type_ << endl;
       return;
