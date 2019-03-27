@@ -138,10 +138,10 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
     // cout << "Radar update R" << endl << ekf_.R_ << endl;
 
     ekf_.H_ = tools.CalculateJacobian(ekf_.x_);  // TODO(jamesfulford): Use current state or measurement?
-    ekf_.Update(measurement_pack.raw_measurements_);
     // cout << "Radar update H" << endl << ekf_.H_ << endl;
 
     // cout << "measurement_pack.raw_measurements_" << endl << measurement_pack.raw_measurements_ << endl;
+    ekf_.UpdateEKF(measurement_pack.raw_measurements_);
     // cout << "Radar update x" << endl << ekf_.x_ << endl;
   } else { // Laser
     cout << "Laser update" << endl;
@@ -149,10 +149,10 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
     // cout << "Laser update R" << endl << ekf_.R_ << endl;
 
     ekf_.H_  = H_laser_;
-    ekf_.UpdateEKF(measurement_pack.raw_measurements_);
     // cout << "Laser update H" << endl << ekf_.H_ << endl;
 
     // cout << "measurement_pack.raw_measurements_" << endl << measurement_pack.raw_measurements_ << endl;
+    ekf_.Update(measurement_pack.raw_measurements_);
     // cout << "Laser update x" << endl << ekf_.x_ << endl;
   }
 
