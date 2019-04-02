@@ -29,15 +29,19 @@ void KalmanFilter::Predict() {
 }
 
 void KalmanFilter::Update(const VectorXd &z) {
-  VectorXd prediction = H_ * x_;
-  VectorXd error = z - prediction;  // linear
-  MatrixXd H_transpose = H_.transpose();
-  MatrixXd S = H_ * P_ * H_transpose + R_;
-  MatrixXd K = P_ * H_transpose * S.inverse();
+  VectorXd z_pred = H_ * x_;
+  VectorXd y = z - z_pred;
+  MatrixXd Ht = H_.transpose();
+  MatrixXd S = H_ * P_ * Ht + R_;
+  MatrixXd Si = S.inverse();
+  MatrixXd PHt = P_ * Ht;
+  MatrixXd K = PHt * Si;
 
-  x_ = x_ + (K * error);
+  //new estimate
+  x_ = x_ + (K * y);
   long x_size = x_.size();
-  P_ = (MatrixXd::Identity(x_size, x_size) - K * H_) * P_;
+  MatrixXd I = MatrixXd::Identity(x_size, x_size);
+  P_ = (I - K * H_) * P_;
 }
 
 void KalmanFilter::UpdateEKF(const VectorXd &z) {
