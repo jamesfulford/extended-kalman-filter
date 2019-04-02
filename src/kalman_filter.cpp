@@ -45,8 +45,38 @@ void KalmanFilter::Update(const VectorXd &z) {
 }
 
 void KalmanFilter::UpdateEKF(const VectorXd &z) {
-  VectorXd prediction = H_ * x_;
+  // x_ to polar (to compare prediction to reality, z)
+  float px = x_[0];
+  float py = x_[1];
+  float vx = x_[2];
+  float vy = x_[3];
+  float px2py2sqrt = pow(pow(px, 2) + pow(py, 2), 0.5);
+
+  float dpdt;
+  if (fabs(px2py2sqrt) < 0.0001) { // you are at the origin
+    // then your change in magnitude is equal to the magnitude of your velocity vector
+    dpdt = pow(pow(vx, 2) + pow(vy, 2), 0.5);
+  } else { // otherwise
+    // you have to account for location when translating to polar
+    // (note that if we used this at origin, we would have a divide by 0 situation)
+    dpdt = ((px * vx) + (py * vy)) / px2py2sqrt;
+  }
+
+  VectorXd prediction = VectorXd(3);
+  prediction << px2py2sqrt,
+                atan2(py, px),
+                dpdt;
+
+  // Compare prediction to reality
   VectorXd error = z - prediction;
+  // Normalize error[1] (angle) to within -π to π
+  while (error[1] < -M_PI || error[1] > M_PI) {
+    if (error[1] < -M_PI) {
+      error[1] = error[1] + (2 * M_PI);
+    } else {
+      error[1] = error[1] - (2 * M_PI);
+    }
+  }
 
   // Update beliefs
   MatrixXd Ht = H_.transpose();
