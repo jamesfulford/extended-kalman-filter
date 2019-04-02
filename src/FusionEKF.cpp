@@ -110,19 +110,20 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
   float dt = (measurement_pack.timestamp_ - previous_timestamp_) / 1000000.0;
   previous_timestamp_ = measurement_pack.timestamp_;
 
-  float dt2 = dt * dt;
-  float dt3 = dt2 * dt;
-  float dt4 = dt3 * dt;
+  float dt_2 = dt * dt;
+  float dt_3 = dt_2 * dt;
+  float dt_4 = dt_3 * dt;
 
+  // Modify the F matrix so that the time is integrated
   ekf_.F_(0, 2) = dt;
   ekf_.F_(1, 3) = dt;
-  // cout << "F" << endl << ekf_.F_ << endl;
 
+  // set the process covariance matrix Q
   ekf_.Q_ = MatrixXd(4, 4);
-  ekf_.Q_ << dt4 * noise_ax / 4, 0, dt3 * noise_ax / 2, 0,
-             0, dt4 * noise_ay / 4, 0, dt3 * noise_ay / 2,
-             dt3 * noise_ax / 2, 0, dt2 * noise_ax, 0,
-             0, dt3 * noise_ay / 2, 0, dt2 * noise_ay;
+  ekf_.Q_ << dt_4 / 4 * noise_ax, 0, dt_3 / 2 * noise_ax, 0,
+      0, dt_4 / 4 * noise_ay, 0, dt_3 / 2 * noise_ay,
+      dt_3 / 2 * noise_ax, 0, dt_2 * noise_ax, 0,
+      0, dt_3 / 2 * noise_ay, 0, dt_2 * noise_ay;
   // cout << "Q" << endl << ekf_.Q_ << endl;
 
   // cout << "x" << endl << ekf_.x_ << endl;
