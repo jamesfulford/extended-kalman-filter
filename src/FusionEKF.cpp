@@ -87,8 +87,8 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
                  0;
       ekf_.P_ << 1, 0, 0, 0,
           0, 1, 0, 0,
-          0, 0, 1000, 0,
-          0, 0, 0, 1000;
+          0, 0, 100, 0,
+          0, 0, 0, 100;
     } else {
       cout << "Unrecognized sensor type: " + measurement_pack.sensor_type_ << endl;
       return;
@@ -104,8 +104,8 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 
   // compute the time elapsed between the current and previous measurements
   // dt - expressed in seconds
-  float noise_ax = 9;
-  float noise_ay = 9;
+  float noise_ax = 5;
+  float noise_ay = 5;
 
   float dt = (measurement_pack.timestamp_ - previous_timestamp_) / 1000000.0;
   previous_timestamp_ = measurement_pack.timestamp_;
