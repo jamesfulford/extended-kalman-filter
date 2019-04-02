@@ -76,8 +76,8 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
                  0;
       ekf_.P_ << 1, 0, 0, 0,
           0, 1, 0, 0,
-          0, 0, 1000, 0,
-          0, 0, 0, 1000;
+          0, 0, 100, 0,
+          0, 0, 0, 100;
     }
     else if (measurement_pack.sensor_type_ == MeasurementPackage::LASER) {
       // cout << "with laser" << endl;
